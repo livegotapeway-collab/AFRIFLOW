@@ -5,22 +5,58 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 
+type Order = {
+  id: string;
+  product_id: string;
+  amount_cdf: number;
+  status: string;
+  created_at: string;
+  productName?: string;
+};
+
 export default function Dashboard() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (error || !data.user) {
+    async function load() {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
         router.replace("/auth");
         return;
       }
-      setEmail(data.user.email ?? "");
+
+      setEmail(user.email ?? "");
+
+      const { data: orderRows } = await supabase
+        .from("orders")
+        .select("id,product_id,amount_cdf,status,created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      const rows = orderRows ?? [];
+      if (rows.length) {
+        const ids = [...new Set(rows.map((row) => row.product_id))];
+        const { data: products } = await supabase
+          .from("products")
+          .select("id,name")
+          .in("id", ids);
+
+        const names = new Map((products ?? []).map((product) => [product.id, product.name]));
+        setOrders(rows.map((row) => ({ ...row, productName: names.get(row.product_id) })));
+      } else {
+        setOrders([]);
+      }
+
       setLoading(false);
-    });
+    }
+
+    load();
   }, [router]);
 
   async function logout() {
@@ -44,7 +80,22 @@ export default function Dashboard() {
         <span className="badge">ESPACE CLIENT</span>
         <h1>Bienvenue sur AFRIFLOW</h1>
         <p>Connecté avec : <strong>{email}</strong></p>
-        <p>Votre espace client est actif. Vos achats et téléchargements apparaîtront ici après paiement.</p>
+        <h2>Mes commandes</h2>
+        {orders.length === 0 ? (
+          <p className="muted">Aucune commande pour le moment.</p>
+        ) : (
+          <div className="cards">
+            {orders.map((order) => (
+              <article key={order.id}>
+                <strong>{order.productName ?? "Kit numérique"}</strong>
+                <p>{new Intl.NumberFormat("fr-FR").format(order.amount_cdf)} CDF</p>
+                <p>Statut : <strong>{order.status}</strong></p>
+                <small>{new Date(order.created_at).toLocaleString("fr-FR")}</small>
+              </article>
+            ))}
+          </div>
+        )}
+        <p className="muted">Le paiement et le téléchargement automatique seront activés après la configuration Mobile Money.</p>
         <Link className="button" href="/products">Découvrir les kits</Link>
       </section>
     </main>
