@@ -27,6 +27,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Produit introuvable." }, { status: 404 });
   }
 
+  const { data: existingOrder } = await supabase
+    .from("orders")
+    .select("id,amount_cdf,status")
+    .eq("user_id", user.id)
+    .eq("product_id", product.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingOrder) {
+    return NextResponse.json({
+      order: existingOrder,
+      paymentReady: false,
+      message: "Vous avez déjà une commande en attente pour ce kit.",
+    });
+  }
+
   const { data: order, error } = await supabase
     .from("orders")
     .insert({
