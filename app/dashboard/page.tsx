@@ -106,6 +106,7 @@ export default function Dashboard() {
 
   const paid = orders.filter((o) => o.status === "paid").length;
   const pending = orders.filter((o) => o.status === "pending").length;
+  const statusLabel = (status: string) => status === "paid" ? "Payée" : status === "pending" ? "En attente" : status;
 
   return (
     <main>
@@ -156,7 +157,7 @@ export default function Dashboard() {
               <article key={order.id}>
                 <strong><Link href={"/orders/" + order.id}>{order.productName ?? "Kit numérique"}</Link></strong>
                 <p>{new Intl.NumberFormat("fr-FR").format(order.amount_cdf)} CDF</p>
-                <p>Statut : <strong>{order.status === "paid" ? "Payée" : order.status === "pending" ? "En attente de paiement" : order.status}</strong></p>
+                <p>Statut : <span className={"status-badge " + (order.status === "paid" ? "status-paid" : order.status === "pending" ? "status-pending" : "")}>{statusLabel(order.status)}</span></p>
                 {order.status === "paid" && <button className="secondary" disabled>Télécharger le kit</button>}
                 <small>{new Date(order.created_at).toLocaleString("fr-FR")}</small>
               </article>
