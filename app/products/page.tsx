@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
+import ProductCatalog from "./ProductCatalog";
 
 export const dynamic = "force-dynamic";
 
@@ -15,32 +16,13 @@ export default async function Products() {
     <main>
       <nav>
         <Link href="/"><b>AFRIFLOW</b></Link>
-        <Link href="/auth">Mon compte</Link>
+        <div><Link href="/products">Kits</Link><Link href="/auth">Mon compte</Link></div>
       </nav>
       <section className="content">
         <span className="badge">KITS NUMÉRIQUES</span>
-        <h1>Choisissez votre kit</h1>
-        <p>Des ressources conçues pour être utilisées depuis votre téléphone.</p>
-
-        {error ? (
-          <p className="notice">Le catalogue est temporairement indisponible.</p>
-        ) : (
-          <div className="grid">
-            {(products ?? []).map((p) => (
-              <article className="product" key={p.id}>
-                <div className="icon">📦</div>
-                <h2>{p.name}</h2>
-                <p>{p.description}</p>
-                <strong>{new Intl.NumberFormat("fr-FR").format(p.price_cdf)} CDF</strong>
-                <Link className="button" href={"/products/" + p.slug}>Voir le kit</Link>
-              </article>
-            ))}
-          </div>
-        )}
-
-        {!error && (products ?? []).length === 0 && (
-          <p className="notice">Aucun produit disponible pour le moment.</p>
-        )}
+        <h1>Des outils pour passer à l’action</h1>
+        <p>Des ressources pratiques, pensées pour être utilisées directement depuis votre téléphone.</p>
+        {error ? <p className="notice">Le catalogue est temporairement indisponible.</p> : <ProductCatalog products={products ?? []} />}
       </section>
     </main>
   );
