@@ -89,13 +89,14 @@ export default function Dashboard() {
               <article key={order.id}>
                 <strong>{order.productName ?? "Kit numérique"}</strong>
                 <p>{new Intl.NumberFormat("fr-FR").format(order.amount_cdf)} CDF</p>
-                <p>Statut : <strong>{order.status}</strong></p>
+                <p>Statut : <strong>{order.status === "paid" ? "Payée" : order.status === "pending" ? "En attente de paiement" : order.status}</strong></p>
+                {order.status === "paid" && <button className="secondary" disabled>Télécharger le kit</button>}
                 <small>{new Date(order.created_at).toLocaleString("fr-FR")}</small>
               </article>
             ))}
           </div>
         )}
-        <p className="muted">Le paiement et le téléchargement automatique seront activés après la configuration Mobile Money.</p>
+        <p className="muted">Paiement : Mobile Money uniquement. Le téléchargement sécurisé sera activé dès que le paiement est confirmé.</p>
         <Link className="button" href="/products">Découvrir les kits</Link>
       </section>
     </main>
