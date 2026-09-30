@@ -18,6 +18,10 @@ export default async function Product({ params }: { params: Promise<{ slug: stri
 
   if (error || !product) notFound();
 
+  const features = product.slug === "kit-whatsapp-business-rdc"
+    ? ["30 messages de vente WhatsApp", "20 réponses aux clients", "Modèle de catalogue", "20 prompts IA", "Calendrier de contenu 30 jours"]
+    : ["Guide pratique étape par étape", "Modèles prêts à utiliser", "Scripts de prospection", "Prompts IA", "Checklist de lancement"];
+
   return (
     <main>
       <nav>
@@ -29,11 +33,13 @@ export default async function Product({ params }: { params: Promise<{ slug: stri
         <span className="badge">KIT NUMÉRIQUE · MOBILE MONEY</span>
         <h1>{product.name}</h1>
         <p>{product.description}</p>
+        <h2>Ce que vous recevez</h2>
+        <ul className="feature-list">{features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
         <div className="buy">
           <strong>{new Intl.NumberFormat("fr-FR").format(product.price_cdf)} CDF</strong>
           <PurchaseButton slug={product.slug} />
         </div>
-        <p className="muted">Vous devez être connecté pour créer votre commande. Le paiement Mobile Money sera branché à l’étape CinetPay.</p>
+        <p className="muted">Vous devez être connecté pour créer votre commande. Paiement prévu en Mobile Money uniquement.</p>
       </section>
     </main>
   );
