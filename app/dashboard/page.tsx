@@ -154,7 +154,7 @@ export default function Dashboard() {
           <div className="cards">
             {orders.map((order) => (
               <article key={order.id}>
-                <strong>{order.productName ?? "Kit numérique"}</strong>
+                <strong><Link href={"/orders/" + order.id}>{order.productName ?? "Kit numérique"}</Link></strong>
                 <p>{new Intl.NumberFormat("fr-FR").format(order.amount_cdf)} CDF</p>
                 <p>Statut : <strong>{order.status === "paid" ? "Payée" : order.status === "pending" ? "En attente de paiement" : order.status}</strong></p>
                 {order.status === "paid" && <button className="secondary" disabled>Télécharger le kit</button>}
