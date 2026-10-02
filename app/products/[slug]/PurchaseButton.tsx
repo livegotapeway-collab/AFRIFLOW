@@ -26,9 +26,12 @@ export default function PurchaseButton({ slug }: { slug: string }) {
         setMessage(data.error || "Impossible de créer la commande.");
         return;
       }
-      setMessage("Commande créée. Le paiement Mobile Money sera activé prochainement.");
-      router.push("/dashboard");
-      router.refresh();
+      if (data.order?.id) {
+        router.push("/orders/" + data.order.id);
+        router.refresh();
+        return;
+      }
+      setMessage("Commande créée. Consultez votre espace client.");
     } catch {
       setMessage("Erreur de connexion. Réessayez.");
     } finally {
@@ -39,7 +42,7 @@ export default function PurchaseButton({ slug }: { slug: string }) {
   return (
     <div>
       <button className="button" onClick={buy} disabled={loading}>
-        {loading ? "Création…" : "Acheter avec Mobile Money"}
+        {loading ? "Création…" : "Créer ma commande"}
       </button>
       {message && <p className="notice">{message}</p>}
     </div>
