@@ -9,42 +9,33 @@ export default function PurchaseButton({ slug }: { slug: string }) {
   const [message, setMessage] = useState("");
 
   async function buy() {
+    const phone = window.prompt("Entrez votre numéro Airtel Money (ex. 0971234567)");
+    if (!phone) return;
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug }),
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug }),
       });
-      const data = await response.json();
-      if (response.status === 401) {
-        router.push("/auth");
-        return;
-      }
-      if (!response.ok) {
-        setMessage(data.error || "Impossible de créer la commande.");
-        return;
-      }
-      if (data.order?.id) {
-        router.push("/orders/" + data.order.id);
-        router.refresh();
-        return;
-      }
-      setMessage("Commande créée. Consultez votre espace client.");
+      const orderData = await orderResponse.json();
+      if (orderResponse.status === 401) { router.push("/auth"); return; }
+      if (!orderResponse.ok || !orderData.order?.id) { setMessage(orderData.error || "Impossible de créer la commande."); return; }
+
+      const paymentResponse = await fetch("/api/payments/airtel", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.order.id, phone }),
+      });
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) { setMessage(paymentData.error || "Paiement Airtel Money impossible."); return; }
+      router.push("/orders/" + orderData.order.id);
+      router.refresh();
     } catch {
       setMessage("Erreur de connexion. Réessayez.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
-  return (
-    <div>
-      <button className="button" onClick={buy} disabled={loading}>
-        {loading ? "Création…" : "Créer ma commande"}
-      </button>
-      {message && <p className="notice">{message}</p>}
-    </div>
-  );
+  return <div>
+    <button className="button" onClick={buy} disabled={loading}>{loading ? "Connexion Airtel…" : "Payer avec Airtel Money"}</button>
+    {message && <p className="notice">{message}</p>}
+  </div>;
 }
