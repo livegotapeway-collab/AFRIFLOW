@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "../../../../lib/supabase/server";
-import { createAdminClient } from "../../../../lib/admin";
-import { getPaymentStatus } from "../../../../lib/airtel-status";
+import { createClient } from "../../../../../lib/supabase/server";
+import { createAdminClient } from "../../../../../lib/admin";
+import { getPaymentStatus } from "../../../../../lib/airtel-status";
 
 export const dynamic = "force-dynamic";
 
